@@ -96,7 +96,7 @@ class BertEncoder(object):
                     sent_dict = {"text": sent, "vec": vec_str, "id": sent_id}
                     f.write(json.dumps(sent_dict) + "\n")
  
- if __name__ == "__main__":
+if __name__ == "__main__":
  
 
 
