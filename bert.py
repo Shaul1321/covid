@@ -1,7 +1,7 @@
 import torch
 from transformers import BertTokenizer
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
-from transformers import BertForSequenceClassification, AdamW, BertConfig, BertModel
+from transformers import BertForSequenceClassification, AdamW, BertConfig, BertModel, AutoTokenizer, AutoModel
 import numpy as np
 from typing import List
 import tqdm
@@ -10,8 +10,11 @@ class BertEncoder(object):
     
     def __init__(self, device = 'cpu'):
         
-        self.tokenizer = BertTokenizer.from_pretrained('scibert_scivocab_uncased/vocab.txt')
-        self.model = BertModel.from_pretrained('scibert_scivocab_uncased/')
+        #self.tokenizer = BertTokenizer.from_pretrained('scibert_scivocab_uncased/vocab.txt')
+        #self.model = BertModel.from_pretrained('scibert_scivocab_uncased/')
+        
+        self.tokenizer = AutoTokenizer.from_pretrained('allenai/scibert_scivocab_uncased')
+        self.model = AutoModel.from_pretrained('allenai/scibert_scivocab_uncased')
             
         self.model.eval()
         self.model.to(device)
