@@ -106,8 +106,10 @@ class BertEncoder(object):
         parser.add_argument('--pooling', dest='pooling', type=str,
                         default="mean-cls-max")
         parser.add_argument('--output_fname', dest='output_fname', type=str,
-                        default="output.mean-cls-max.jsonl")                                     
+                        default="output.mean-cls-max.jsonl")
+        parser.add_argument('--device', dest='device', type=str,
+                        default="cpu")  
         args = parser.parse_args()
                        
-        encoder = BertEncoder("cuda:0")
+        encoder = BertEncoder(args.device)
         encoder.encode(sents, ids, batch_size = 32, strategy = args.pooling, fname=args.output_fname)
