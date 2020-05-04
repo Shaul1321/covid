@@ -98,18 +98,23 @@ class BertEncoder(object):
  
  if __name__ == "__main__":
  
-        df = pd.read_csv("results.covid_dataset.all.tsv", sep = "\t")
-        ids, sents = df["sentence_id"].tolist(), df["sentence_text"].tolist()
 
-        parser = argparse.ArgumentParser(description='balanced brackets generation',
+
+        parser = argparse.ArgumentParser(description='collect bert states over sentences',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument('--input-filename', dest='input_filename', type=str,
+                        default="results.tsv")
+            
         parser.add_argument('--pooling', dest='pooling', type=str,
-                        default="mean-cls-max")
+                        default="cls")
         parser.add_argument('--output_fname', dest='output_fname', type=str,
-                        default="output.mean-cls-max.jsonl")
+                        default="output-cls.jsonl")
         parser.add_argument('--device', dest='device', type=str,
                         default="cpu")  
         args = parser.parse_args()
-                       
+        
+        df = pd.read_csv(args.input_filename, sep = "\t")
+        ids, sents = df["sentence_id"].tolist(), df["sentence_text"].tolist()
+        
         encoder = BertEncoder(args.device)
         encoder.encode(sents, ids, batch_size = 32, strategy = args.pooling, fname=args.output_fname)
