@@ -38,7 +38,7 @@ def load_bert():
 @st.cache(allow_output_mutation=True)        
 def load_pca(pooling):
 
-    fname = "output-" + pooling + ".pca.pickle"
+    fname = "output-new." + pooling + ".pca.pickle"
     with open(fname, "rb") as f:
     
         return pickle.load(f)
@@ -48,11 +48,11 @@ st.title('COVID-19 Similarity Search')
 
 #a = st.empty()
 mode = st.sidebar.radio("Mode", ("Sentence", "SPIKE-covid19"))
-similarity = st.sidebar.selectbox('Similarity', ('dot product', "l2"))
+similarity = "dot product" #st.sidebar.selectbox('Similarity', ('dot product', "l2"))
 pooling = st.sidebar.selectbox('Pooling', ('cls', 'mean-cls'))
 
-if mode == "Sentence":
-    filter_by_spike = True if st.sidebar.selectbox('Filter by SPIKE query?', ('False', 'True'))=="True" else False
+#if mode == "Sentence":
+#    filter_by_spike = True if st.sidebar.selectbox('Filter by SPIKE query?', ('False', 'True'))=="True" else False
 
 df, sents, ids, id2ind, ind2id = load_sents_and_ids()
 #sents =  df["sentence_text"].tolist()
@@ -68,31 +68,59 @@ bert = load_bert()
 pca = load_pca(pooling)
 st.write("Uses {}-dimensional vectors".format(pca.components_.shape[0]))
 
-if mode == "Sentence" and filter_by_spike:
 
-    #filter_query = st.text_input('Enter a SPIKE query to filter by', 'This [nsubj drug] treats [obj:l coronavirus].')
-
-    query_type = st.radio("Query type", ("syntactic", "boolean", "token"))
-    if query_type == "syntactic":
-        filter_query = st.text_input('Query', 'The [subj:l coronavirus] [copula:w is] prevalent among [w:e bats].')
-    elif query_type == "boolean":
-       filter_query = st.text_input('Query', 'virus lemma=persist on')
-    elif query_type == "token":
-       filter_query = st.text_input('Query', 'novel coronavirus')
-
-
-    filter_size = int(st.text_input('How many SPIKE search results?',  3000))
-    results_df = spike_queries.perform_query(filter_query, dataset_name = "covid19", num_results = filter_size, query_type = query_type)
-    results_sents = np.array(results_df["sentence_text"].tolist())
-    results_ids = [hash(s) for s in results_sents]
-
+#""" 
+#if mode == "Sentence" and filter_by_spike:
+#
+#    #filter_query = st.text_input('Enter a SPIKE query to filter by', 'This [nsubj drug] treats [obj:l coronavirus].')
+#
+#    query_type = st.radio("Query type", ("syntactic", "boolean", "token"))
+#    if query_type == "syntactic":
+#        filter_query = st.text_input('Query', 'The [subj:l coronavirus] [copula:w is] prevalent among [w:e bats].')
+#    elif query_type == "boolean":
+#       filter_query = st.text_input('Query', 'virus lemma=persist on')
+#    elif query_type == "token":
+#       filter_query = st.text_input('Query', 'novel coronavirus')
+#
+#    filter_size = int(st.text_input('How many SPIKE search results?',  3000))
+#    results_df = spike_queries.perform_query(filter_query, dataset_name = "covid19", num_results = filter_size, query_type = query_type)
+#    results_sents = np.array(results_df["sentence_text"].tolist())
+#    results_ids = [hash(s) for s in results_sents]
+#"""
 
 if mode == "Sentence":
 
-    input_sentence = st.text_input('Input sentence', 'The virus can spread rapidly via different transimission vectors.')
+    input_sentence = st.text_input('Enter a sentence for similarity search', 'The virus can spread rapidly via different transimission vectors.')
+
+
+    filter_by =  st.selectbox('Filter results based on:', ('None', 'Boolean query', 'Token query', 'Syntactic query')) 
+    query_type = "syntactic" if "syntactic" in filter_by.lower() else "boolean" if "boolean" in filter_by.lower() else "token" if "token" in filter_by.lower() else None
+    filter_by_spike = query_type is not None
+
+    if query_type == "syntactic":
+        filter_query = st.text_input('SPIKE query', 'The [subj:l coronavirus] [copula:w is] prevalent among [w:e bats].')
+    elif query_type == "boolean":
+       filter_query = st.text_input('SPIKE query', 'virus lemma=persist on')
+    elif query_type == "token":
+       filter_query = st.text_input('SPIKE query', 'novel coronavirus')
+    
+    if query_type is not None:
+
+        filter_size = st.slider('Max number of results', 1, 10000, 3000)
+
+        results_df = spike_queries.perform_query(filter_query, dataset_name = "covid19", num_results = filter_size, query_type = query_type)
+        results_sents = np.array(results_df["sentence_text"].tolist())
+        results_ids = [hash(s) for s in results_sents]
+
+        st.write("Found {} matches".format(len(results_ids)))
+    else:
+
+        number_of_sentence_results  = st.slider('Number of results', 1, 1000, 100) #int(st.text_input('Number of results',  100))
+
 elif "SPIKE" in mode:
 
-    query_type = st.radio("Query type", ("syntactic", "boolean", "token"))
+    query_type = st.radio("Query type", ("Boolean", "Token", "Syntactic"))
+    query_type = query_type.lower()
     if query_type == "syntactic":
         input_query = st.text_input('Query', 'The [subj:l coronavirus] [copula:w is] prevalent among [w:e bats].')
     elif query_type == "boolean":
@@ -100,7 +128,7 @@ elif "SPIKE" in mode:
     elif query_type == "token":
        input_query = st.text_input('Query', 'novel coronavirus')
 
-    max_results = int(st.text_input("How many resuls?", 25))
+    max_results = st.slider('Max number of results', 1, 5000, 25)  #int(st.text_input("Max number of results", 25))
 
             
 show_results = True
@@ -117,8 +145,9 @@ if start:
     #st.write(index.d)
     
     if not filter_by_spike:
-    
-        D,I = index.search(np.ascontiguousarray(encoding), 100)
+        #st.write(encoding.shape, pca.components_.shape, index.d)
+        #st.write(help(index)) 
+        D,I = index.search(np.ascontiguousarray(encoding), number_of_sentence_results)
     
     else:
         
@@ -146,7 +175,9 @@ if start:
         results_df = spike_queries.perform_query(input_query, dataset_name = "covid19", num_results = max_results, query_type = query_type)
         results_sents = results_df["sentence_text"].tolist()
         results_ids = [hash(s) for s in results_sents] #results_df["sentence_id"].tolist()
-        
+         
+        st.write("Found {} matches".format(len(results_ids)))
+
         if len(results_sents) > 0:
             st.write("First sentences retrieved:")
             st.table(results_sents[:10])
@@ -163,7 +194,7 @@ if start:
             st.write("No resutls found.")
 
  if show_results:
-    st.write("Performed query of type '{}'. Similarity search results:".format(mode))
     results = [sents[i] for i in I.squeeze()]
+    st.write("Performed query of type '{}'. Similarity search results:".format(mode))
     st.write(st.table(results))
     
