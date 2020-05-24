@@ -38,7 +38,7 @@ def load_bert():
 @st.cache(allow_output_mutation=True)        
 def load_pca(pooling):
 
-    fname = "output-new." + pooling + ".pca.pickle"
+    fname = "output-" + pooling + ".pca.pickle"
     with open(fname, "rb") as f:
     
         return pickle.load(f)
