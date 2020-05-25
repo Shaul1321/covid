@@ -10,14 +10,14 @@ PUBMED_BASE_URL = "http://34.89.172.235:5000"
 
 
 
-def get_tsv_url(response: requests.models.Response, results_limit: int, base_url, remove_duplicates: bool = True) -> str:
+def get_tsv_url(response: requests.models.Response, results_limit: int, base_url) -> str:
     
     tsv_location = response.headers["tsv-location"]
     tsv_url = base_url + tsv_location +"?sentence_text=True&capture_indices=True&sentence_id=True&limit={}".format(results_limit)
     return tsv_url
     
 @st.cache(allow_output_mutation=True)    
-def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 10, query_type : str = "syntactic") -> pd.DataFrame:
+def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 10, query_type : str = "syntactic", remove_duplicates: bool = True) -> pd.DataFrame:
 
         
    template = """{{
