@@ -10,7 +10,7 @@ PUBMED_BASE_URL = "http://34.89.172.235:5000"
 
 
 
-def get_tsv_url(response: requests.models.Response, results_limit: int, base_url) -> str:
+def get_tsv_url(response: requests.models.Response, results_limit: int, base_url, remove_duplicates: bool = True) -> str:
     
     tsv_location = response.headers["tsv-location"]
     tsv_url = base_url + tsv_location +"?sentence_text=True&capture_indices=True&sentence_id=True&limit={}".format(results_limit)
@@ -37,4 +37,6 @@ def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 1
    
    tsv_url = get_tsv_url(response, results_limit = num_results, base_url = base_url)
    df = pd.read_csv(tsv_url, sep = "\t")
+   if remove_duplicates:
+        df = df.drop_duplicates("sentence_text")
    return df
