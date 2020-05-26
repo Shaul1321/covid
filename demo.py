@@ -188,7 +188,7 @@ if start:
             st.table(results_sents[:10])
             
             encoding = np.array([index.reconstruct(id2ind[i]) for i in results_ids if i in id2ind])
-            if encodings.shape[0] > 0:
+            if encoding.shape[0] > 0:
                 encoding = np.mean(encoding, axis = 0)
                 D,I = index.search(np.ascontiguousarray([encoding]), 100)
             else:
