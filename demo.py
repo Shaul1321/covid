@@ -146,17 +146,22 @@ if start:
     
     if not filter_by_spike:
         #st.write(encoding.shape, pca.components_.shape, index.d)
-        #st.write(help(index)) 
+        #st.write(help(index))
+        
         D,I = index.search(np.ascontiguousarray(encoding), number_of_sentence_results)
     
     else:
         
         encoding_of_spike_results = np.array([index.reconstruct(id2ind[i]) for i in results_ids if i in id2ind])
-        sims = sklearn.metrics.pairwise.cosine_similarity(encoding, encoding_of_spike_results)
-        idx_sorted = sims.argsort()[0]
-        spike_sents_sorted = results_sents[idx_sorted][::-1]
-        I = np.array([[id2ind[hash(s)] for s in spike_sents_sorted if hash(s) in id2ind]])
-
+        if encoding_of_spike_results.shape[0] > 0:
+            sims = sklearn.metrics.pairwise.cosine_similarity(encoding, encoding_of_spike_results)
+            idx_sorted = sims.argsort()[0]
+            spike_sents_sorted = results_sents[idx_sorted][::-1]
+            I = np.array([[id2ind[hash(s)] for s in spike_sents_sorted if hash(s) in id2ind]])
+        else:
+            show_results = False
+            st.write("SPIKE search results are not indexed.")
+            
  elif mode == "IDs":
     input_ids = st.text_input('Input ids', '39, 41, 49, 50, 112, 116, 119, 229, 286, 747')
     input_ids = [int(x) for x in input_ids.replace(" ", "").split(",")]
@@ -183,9 +188,12 @@ if start:
             st.table(results_sents[:10])
             
             encoding = np.array([index.reconstruct(id2ind[i]) for i in results_ids if i in id2ind])
-            encoding = np.mean(encoding, axis = 0)
-            D,I = index.search(np.ascontiguousarray([encoding]), 100)
-            
+            if encodings.shape[0] > 0:
+                encoding = np.mean(encoding, axis = 0)
+                D,I = index.search(np.ascontiguousarray([encoding]), 100)
+            else:
+                show_results = False
+                st.write("SPIKE search results are not indexed.")           
             #encoding = pca.transform(bert.encode(results_sents, [1]*len(results_sents), batch_size = 8, strategy = pooling, fname = "dummy.txt", write = False))#.squeeze()
             #encoding = np.mean(encoding, axis = 0)
             #D,I = index.search(np.ascontiguousarray([encoding]), 100)
@@ -197,4 +205,3 @@ if start:
     results = [sents[i] for i in I.squeeze()]
     st.write("Performed query of type '{}'. Similarity search results:".format(mode))
     st.write(st.table(results))
-    
