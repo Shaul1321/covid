@@ -13,7 +13,7 @@ import time
 @st.cache(allow_output_mutation=True)
 def load_sents_and_ids():
     with st.spinner('Loading sentences and IDs...'):
-        df = pd.read_csv("results.tsv", sep = "\t")
+        df = pd.read_csv("data/results.tsv", sep = "\t")
         sents =  df["sentence_text"].tolist()
         ids = [hash(s) for s in sents]
 
@@ -25,7 +25,7 @@ def load_sents_and_ids():
 @st.cache(allow_output_mutation=True)
 def load_index(similarity, pooling):
     with st.spinner('Loading FAISS index...'):
-        fname = "output-" + pooling + ".index"
+        fname = "data/output-" + pooling + ".index"
         index = faiss.read_index(fname)
         return index
 
@@ -38,7 +38,7 @@ def load_bert():
 @st.cache(allow_output_mutation=True)        
 def load_pca(pooling):
 
-    fname = "output-" + pooling + ".pca.pickle"
+    fname = "data/output-" + pooling + ".pca.pickle"
     with open(fname, "rb") as f:
     
         return pickle.load(f)
