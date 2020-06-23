@@ -23,7 +23,6 @@ def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 1
    template = """{{
   "queries": {{"{query_type}": "{query_content}"}},
   "data_set_name": "{dataset_name}",
-  "include_annotations": true
 }}"""
         
    query = template.format(query_content = query, dataset_name = dataset_name, query_type = query_type)
