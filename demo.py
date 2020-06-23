@@ -67,7 +67,7 @@ index = load_index(similarity, pooling)
 bert = load_bert()
 pca = load_pca(pooling)
 st.write("Uses {}-dimensional vectors".format(pca.components_.shape[0]))
-
+print("Try accessing the demo under localhost:8080 (or the default port 8501).")
 
 #""" 
 #if mode == "Sentence" and filter_by_spike:
