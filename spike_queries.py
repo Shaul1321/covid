@@ -19,7 +19,8 @@ def get_tsv_url(response: requests.models.Response, results_limit: int, base_url
 @st.cache(allow_output_mutation=True)    
 def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 10, query_type : str = "syntactic", remove_duplicates: bool = True) -> pd.DataFrame:
 
-        
+   print(query, dataset_name, query_type, remove_duplicates)
+
    template = """{{
   "queries": {{"{query_type}": "{query_content}"}},
   "data_set_name": "{dataset_name}",
@@ -33,7 +34,7 @@ def perform_query(query: str, dataset_name: str = "pubmed", num_results: int = 1
         url, base_url = COVID_URL, COVID_BASE_URL
    
    response = requests.post(url, data = query, headers = headers)
-   
+   print("Response: {}".format(response))   
    tsv_url = get_tsv_url(response, results_limit = num_results, base_url = base_url)
    df = pd.read_csv(tsv_url, sep = "\t")
    if remove_duplicates:
