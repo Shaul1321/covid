@@ -13,11 +13,11 @@ import time
 @st.cache(allow_output_mutation=True)
 def load_sents_and_ids():
     with st.spinner('Loading sentences and IDs...'):
-        #df = pd.read_csv("data/results.tsv", sep = "\t")
-        #sents =  df["sentence_text"].tolist()
-        with open("data/sents.txt", "r", encoding = "utf-8") as f:
-            sents = f.readlines()
-            sents = [s.strip() for s in sents]
+        df = pd.read_csv("data/results.tsv", sep = "\t")
+        sents =  df["sentence_text"].tolist()
+        #with open("data/sents.txt", "r", encoding = "utf-8") as f:
+        #    sents = f.readlines()
+        #    sents = [s.strip() for s in sents]
         
         ids = [hash(s) for s in sents]
 
