@@ -13,14 +13,18 @@ import time
 @st.cache(allow_output_mutation=True)
 def load_sents_and_ids():
     with st.spinner('Loading sentences and IDs...'):
-        df = pd.read_csv("data/results.tsv", sep = "\t")
-        sents =  df["sentence_text"].tolist()
+        #df = pd.read_csv("data/results.tsv", sep = "\t")
+        #sents =  df["sentence_text"].tolist()
+        with open("data/sents.txt", "r", encoding = "utf-8") as f:
+            sents = f.readlines()
+            sents = [s.strip() for s in sents]
+        
         ids = [hash(s) for s in sents]
 
         id2ind = {ids[i]:i for i,s in enumerate(sents)}
         ind2id = {i:ids[i] for i,s in enumerate(sents)}
 
-        return df, sents, ids, id2ind, ind2id
+        return sents, ids, id2ind, ind2id
 
 @st.cache(allow_output_mutation=True)
 def load_index(similarity, pooling):
@@ -54,7 +58,7 @@ pooling = st.sidebar.selectbox('Pooling', ('cls', 'mean-cls'))
 #if mode == "Sentence":
 #    filter_by_spike = True if st.sidebar.selectbox('Filter by SPIKE query?', ('False', 'True'))=="True" else False
 
-df, sents, ids, id2ind, ind2id = load_sents_and_ids()
+sents, ids, id2ind, ind2id = load_sents_and_ids()
 #sents =  df["sentence_text"].tolist()
 #ids = [hash(s) for s in sents]
 print("len sents", len(sents))
