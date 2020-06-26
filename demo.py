@@ -71,6 +71,7 @@ index = load_index(similarity, pooling)
 bert = load_bert()
 pca = load_pca(pooling)
 st.write("Uses {}-dimensional vectors".format(pca.components_.shape[0]))
+st.wirte("Number of indexed sentences: {}".format(len(sents)))
 print("Try accessing the demo under localhost:8080 (or the default port).")
 
 #""" 
